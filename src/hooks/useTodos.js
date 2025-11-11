@@ -1,35 +1,55 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 
 export default function useTodos() {
-  const [todos, setTodos] = useState([
-    {
-      id: 1,
-      title: '示例待办事项',
-      desc: '示例描述',
-      color: 'bg-green-100',
-      done: false,
-      expanded: false,
-    },
-    {
-      id: 2,
-      title: '另一个待办事项',
-      desc: '另一个描述',
-      color: 'bg-blue-100',
-      done: false,
-      expanded: false,
-    },
-    {
-      id: 3,
-      title: '已完成的事项',
-      desc: '已完成事项的描述',
-      color: 'bg-yellow-100',
-      done: true,
-      expanded: false,
-    },
-  ]);
+  const [todos, setTodos] = useState([]); // 初始空：SSR/客户端一致，避免mismatch
 
   const [search, setSearch] = useState('');
+
+  // 客户端加载：localStorage或默认数据（同步+验证，避免覆盖）
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('todos');
+        let loadedTodos = [];
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            loadedTodos = parsed;
+          }
+        }
+        // 如果无效/空，fallback默认
+        if (loadedTodos.length === 0) {
+          loadedTodos = [];
+          localStorage.setItem('todos', JSON.stringify(loadedTodos));
+        }
+        // schedule the state update as a non-urgent transition to avoid synchronous setState in effect
+        startTransition(() => {
+          setTodos(loadedTodos);
+        });
+      } catch (error) {
+        console.error('Failed to load todos from localStorage:', error);
+        // Fallback默认（同步）
+        const defaultTodos = [ ];
+        // schedule fallback update as a transition as well
+        startTransition(() => {
+          setTodos(defaultTodos);
+        });
+        localStorage.setItem('todos', JSON.stringify(defaultTodos));
+      }
+    }
+  }, []);
+
+  // 保存：todos变时异步存
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('todos', JSON.stringify(todos));
+      } catch (error) {
+        console.error('Failed to save todos to localStorage:', error);
+      }
+    }
+  }, [todos]);
 
   // 切换完成状态
   const toggleTodo = (id) => {
