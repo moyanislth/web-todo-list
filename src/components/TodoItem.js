@@ -77,9 +77,9 @@ export default function TodoItem({
         </div>
       </div>
 
-      {/* 描述区 */}
+      {/* 描述区：支持换行/空格（white-space: pre-wrap） */}
       {todo.expanded && todo.desc && (
-        <div className={`px-12 pb-4 text-sm ${todo.done ? "text-gray-500 line-through" : "text-gray-600"}`}>
+        <div className={`px-12 pb-4 text-sm ${todo.done ? "text-gray-500 line-through" : "text-gray-600"} whitespace-pre-wrap break-words`}>
           {todo.desc}
         </div>
       )}
