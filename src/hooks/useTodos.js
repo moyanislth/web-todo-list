@@ -1,55 +1,64 @@
 'use client'
-import { useState, useEffect, startTransition } from 'react';
+import { useState, useEffect } from 'react';
+import useDataPersistence from './useDataPersistence';
 
 export default function useTodos() {
   const [todos, setTodos] = useState([]); // 初始空：SSR/客户端一致，避免mismatch
+  const [isLoading, setIsLoading] = useState(true); // 新增：加载状态
 
   const [search, setSearch] = useState('');
+
+  // 集成持久化hook（移除todos传参，直接setTodos）
+  const { exportTodos, importTodos } = useDataPersistence(setTodos);
 
   // 客户端加载：localStorage或默认数据（同步+验证，避免覆盖）
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      setIsLoading(true); // 标记加载中
       try {
+        console.log('Loading from localStorage...'); // 调试
         const saved = localStorage.getItem('todos');
+        console.log('Raw localStorage "todos":', saved); // 调试：原始内容
         let loadedTodos = [];
         if (saved) {
           const parsed = JSON.parse(saved);
+          console.log('Parsed localStorage:', parsed); // 调试：解析后
           if (Array.isArray(parsed) && parsed.length > 0) {
             loadedTodos = parsed;
           }
         }
         // 如果无效/空，fallback默认
         if (loadedTodos.length === 0) {
-          loadedTodos = [];
+          console.log('No valid data, loading defaults...'); // 调试
+          loadedTodos = [ ];
           localStorage.setItem('todos', JSON.stringify(loadedTodos));
         }
-        // schedule the state update as a non-urgent transition to avoid synchronous setState in effect
-        startTransition(() => {
-          setTodos(loadedTodos);
-        });
+        setTodos(loadedTodos);
+        console.log('Loaded todos:', loadedTodos); // 最终状态
       } catch (error) {
         console.error('Failed to load todos from localStorage:', error);
         // Fallback默认（同步）
         const defaultTodos = [ ];
-        // schedule fallback update as a transition as well
-        startTransition(() => {
-          setTodos(defaultTodos);
-        });
+        setTodos(defaultTodos);
         localStorage.setItem('todos', JSON.stringify(defaultTodos));
+      } finally {
+        setIsLoading(false); // 加载完
       }
+    } else {
+      setIsLoading(false); // SSR下不加载
     }
   }, []);
 
   // 保存：todos变时异步存
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isLoading) {
       try {
         localStorage.setItem('todos', JSON.stringify(todos));
       } catch (error) {
         console.error('Failed to save todos to localStorage:', error);
       }
     }
-  }, [todos]);
+  }, [todos, isLoading]);
 
   // 切换完成状态
   const toggleTodo = (id) => {
@@ -105,6 +114,7 @@ export default function useTodos() {
   return {
     todos,
     setTodos,
+    isLoading, // 新增返回加载状态
     search,
     setSearch,
     filteredTodos,
@@ -114,5 +124,7 @@ export default function useTodos() {
     toggleExpand,
     addTodo,
     deleteTodo,
+    exportTodos,
+    importTodos,
   };
 }

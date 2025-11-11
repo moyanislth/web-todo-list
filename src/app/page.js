@@ -19,6 +19,9 @@ export default function TodoPage() {
     toggleExpand,
     addTodo,
     deleteTodo,
+    exportTodos,
+    importTodos, // 新增：导入功能
+    isLoading, // 新增：加载状态
   } = useTodos();
 
   const [showAdd, setShowAdd] = useState(false);    
@@ -50,6 +53,10 @@ export default function TodoPage() {
     };
   }, [showAdd]);
 
+  if (isLoading) {
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">加载中...</div>; // 加载屏
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10">
 
@@ -58,6 +65,9 @@ export default function TodoPage() {
         done={done.length}
         showAdd={showAdd}
         setShowAdd={setShowAdd}
+        exportTodos={exportTodos}
+        importTodos={importTodos}
+        isLoading={isLoading} // 新增：传加载状态到Header
       />
 
       {/* 弹窗及遮罩 */}
