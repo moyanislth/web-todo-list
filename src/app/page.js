@@ -24,10 +24,30 @@ export default function TodoPage() {
   const [showAdd, setShowAdd] = useState(false);    
   const [editTodo, setEditTodo] = useState(null);
 
-  // 锁定滚动条（保留，简单且有效）
+  // 隐藏滚动条：模态打开时添加class到html和body
   useEffect(() => {
-    document.body.style.overflow = showAdd ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (typeof document !== 'undefined') {
+      const html = document.documentElement;
+      const body = document.body;
+
+      if (showAdd) {
+        html.classList.add('scrollbar-hide');
+        body.classList.add('scrollbar-hide');
+      } else {
+        html.classList.remove('scrollbar-hide');
+        body.classList.remove('scrollbar-hide');
+      }
+    }
+
+    // 清理：unmount时移除
+    return () => {
+      if (typeof document !== 'undefined') {
+        const html = document.documentElement;
+        const body = document.body;
+        html.classList.remove('scrollbar-hide');
+        body.classList.remove('scrollbar-hide');
+      }
+    };
   }, [showAdd]);
 
   return (
