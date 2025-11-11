@@ -4,11 +4,19 @@ export default function AddTodo({ onAdd, onCancel, initialTitle = '', initialDes
   const [title, setTitle] = useState(initialTitle);
   const [desc, setDesc] = useState(initialDesc);
 
-  // 当初始值变化时更新输入框
   useEffect(() => {
-    setTitle(initialTitle);
-    setDesc(initialDesc);
+    const timeoutId = setTimeout(() => {
+      setTitle(initialTitle);
+      setDesc(initialDesc);
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, [initialTitle, initialDesc]);
+
+  const handleSubmit = () => {
+    if (!title?.trim()) return;
+    onAdd(title, desc);
+  };
 
   return (
     <div className="w-full max-w-2xl px-6 mb-6 bg-white border border-gray-200 rounded-lg shadow-sm p-4 space-y-3">
@@ -33,9 +41,7 @@ export default function AddTodo({ onAdd, onCancel, initialTitle = '', initialDes
           取消
         </button>
         <button
-          onClick={() => {
-            onAdd(title, desc);
-          }}
+          onClick={handleSubmit}
           className="px-4 py-2 rounded-md bg-yellow-400 hover:bg-yellow-500 text-white font-medium transition"
         >
           添加

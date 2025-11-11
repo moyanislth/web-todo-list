@@ -8,6 +8,8 @@ import useTodos from '@/hooks/useTodos';
 
 export default function TodoPage() {
   const {
+    // 关键：解构 setTodos，用于实现拖拽排序
+    setTodos, 
     filteredTodos,
     undone,
     done,
@@ -19,10 +21,10 @@ export default function TodoPage() {
     deleteTodo,
   } = useTodos();
 
-  const [showAdd, setShowAdd] = useState(false);    // 是否显示弹窗
+  const [showAdd, setShowAdd] = useState(false);    
   const [editTodo, setEditTodo] = useState(null);
 
-  // 锁定滚动条
+  // 锁定滚动条（保留，简单且有效）
   useEffect(() => {
     document.body.style.overflow = showAdd ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -83,6 +85,8 @@ export default function TodoPage() {
         deleteTodo={deleteTodo}
         setShowAdd={setShowAdd}
         setEditTodo={setEditTodo}
+        // 关键：将 setTodos 传入 TodoList
+        setTodos={setTodos} 
       />
 
       <footer className="w-full max-w-2xl text-center text-gray-400 text-sm mt-10 border-t pt-6">

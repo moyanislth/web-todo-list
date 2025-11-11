@@ -1,28 +1,40 @@
 import React, { useState } from "react";
 
-export default function TodoItem({ todo, toggleTodo, toggleExpand, deleteTodo, setShowAdd, setEditTodo }) {
+export default function TodoItem({ 
+  todo, 
+  toggleTodo, 
+  toggleExpand, 
+  deleteTodo, 
+  setShowAdd, 
+  setEditTodo,
+  // 拖拽相关 props
+  isDragging,
+  onDragStart,
+  onDragEnter,
+  onDragEnd 
+}) {
   const [showActions, setShowActions] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [editData, setEditData] = useState({ title: "", desc: "" });
-
+  
   const handleEdit = () => {
-    setEditTodo(todo);  // 将当前 todo 传给父组件
-    setShowAdd(true);   // 显示 AddTodo
+    setEditTodo(todo);
+    setShowAdd(true);
   };
-
-  const handleSaveEdit = () => {
-    // 删除原数据
-    deleteTodo(todo.id);
-    // 新建新数据
-    addTodo({ title: editData.title, desc: editData.desc, color: todo.color });
-    setShowModal(false);
-  };
-
+  
   return (
     <div
-      className={`${todo.color} rounded-lg shadow-sm hover:shadow-md transition cursor-pointer`}
+      // 拖拽属性
+      draggable={true}
+      onDragStart={() => onDragStart(todo.id)}
+      onDragEnter={(e) => { e.preventDefault(); onDragEnter(todo.id); }}
+      onDragOver={(e) => e.preventDefault()}
+      onDragEnd={onDragEnd}
+      onDrop={(e) => e.preventDefault()} // 空实现，当前无drop需求
+      
+      className={`${todo.color} rounded-lg shadow-sm hover:shadow-md transition cursor-pointer 
+        ${isDragging ? 'opacity-30 border-2 border-blue-500' : ''}`}
+      
       onMouseLeave={() => setShowActions(false)}
-      onClick={() => { if (!todo.done) toggleExpand(todo.id); }}
+      onClick={() => toggleExpand(todo.id)} // 统一：所有项支持展开查看描述
     >
       <div className="flex items-center justify-between p-4 relative">
         {/* 左侧标题 */}
@@ -69,32 +81,6 @@ export default function TodoItem({ todo, toggleTodo, toggleExpand, deleteTodo, s
       {todo.expanded && todo.desc && (
         <div className={`px-12 pb-4 text-sm ${todo.done ? "text-gray-500 line-through" : "text-gray-600"}`}>
           {todo.desc}
-        </div>
-      )}
-
-      {/* 编辑弹窗 */}
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-96">
-            <h3 className="text-lg font-medium mb-4">修改待办</h3>
-            <input
-              type="text"
-              value={editData.title}
-              onChange={(e) => setEditData({ ...editData, title: e.target.value })}
-              placeholder="标题"
-              className="w-full mb-2 p-2 border rounded"
-            />
-            <textarea
-              value={editData.desc}
-              onChange={(e) => setEditData({ ...editData, desc: e.target.value })}
-              placeholder="描述"
-              className="w-full mb-4 p-2 border rounded"
-            />
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setShowModal(false)} className="px-4 py-1 bg-gray-200 rounded hover:bg-gray-300">取消</button>
-              <button onClick={handleSaveEdit} className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">保存</button>
-            </div>
-          </div>
         </div>
       )}
     </div>
