@@ -52,18 +52,21 @@ export default function useTodos() {
   };
 
   // 新增
-  const addTodo = (title, desc) => {
-    if (!title.trim()) return;
+  const addTodo = (title, desc = '', color) => {
+    if (!title || typeof title !== 'string' || !title.trim()) return;
+
     const colors = ['bg-green-100', 'bg-yellow-100', 'bg-blue-100', 'bg-pink-100'];
+
     const newTodo = {
       id: Date.now(),
       title: title.trim(),
-      desc: desc.trim(),
-      color: colors[Math.floor(Math.random() * colors.length)],
+      desc: desc || '',
       done: false,
       expanded: false,
+      color: color || colors[Math.floor(Math.random() * colors.length)],
     };
-    setTodos((prev) => [newTodo, ...prev]);
+
+    setTodos(prev => [newTodo, ...prev]);
   };
 
   // 搜索过滤（仅标题）

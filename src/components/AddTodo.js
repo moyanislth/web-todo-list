@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function AddTodo({ onAdd, onCancel }) {
-  const [title, setTitle] = useState('');
-  const [desc, setDesc] = useState('');
+export default function AddTodo({ onAdd, onCancel, initialTitle = '', initialDesc = '' }) {
+  const [title, setTitle] = useState(initialTitle);
+  const [desc, setDesc] = useState(initialDesc);
+
+  // 当初始值变化时更新输入框
+  useEffect(() => {
+    setTitle(initialTitle);
+    setDesc(initialDesc);
+  }, [initialTitle, initialDesc]);
 
   return (
     <div className="w-full max-w-2xl px-6 mb-6 bg-white border border-gray-200 rounded-lg shadow-sm p-4 space-y-3">
@@ -29,8 +35,6 @@ export default function AddTodo({ onAdd, onCancel }) {
         <button
           onClick={() => {
             onAdd(title, desc);
-            setTitle('');
-            setDesc('');
           }}
           className="px-4 py-2 rounded-md bg-yellow-400 hover:bg-yellow-500 text-white font-medium transition"
         >

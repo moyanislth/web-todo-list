@@ -1,6 +1,6 @@
 import TodoItem from './TodoItem';
 
-export default function TodoList({ todos, toggleTodo, toggleExpand, deleteTodo}) {
+export default function TodoList({ todos, toggleTodo, toggleExpand, deleteTodo, setShowAdd, setEditTodo }) {
   const undone = todos.filter((t) => !t.done);
   const done = todos.filter((t) => t.done);
 
@@ -13,6 +13,8 @@ export default function TodoList({ todos, toggleTodo, toggleExpand, deleteTodo})
           toggleTodo={toggleTodo}
           toggleExpand={toggleExpand}
           deleteTodo={deleteTodo}
+          setShowAdd={setShowAdd}
+          setEditTodo={setEditTodo}
         />
       ))}
 
@@ -32,6 +34,8 @@ export default function TodoList({ todos, toggleTodo, toggleExpand, deleteTodo})
           toggleTodo={toggleTodo}
           toggleExpand={toggleExpand}
           deleteTodo={deleteTodo}
+          setShowAdd={setShowAdd}
+          setEditTodo={setEditTodo}
         />
       ))}
 
